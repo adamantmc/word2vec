@@ -2,9 +2,12 @@ import json
 import collections
 import nltk
 import re
+import math
+import random
 from util import *
 
-regex = re.compile(r"[^a-zA-Z-\s]")
+regex1 = re.compile(r"[^a-zA-Z-\s]")
+regex2 = re.compile(r"^[\W_]+$")
 
 def read_datasets(training_set_path, test_set_path, test_set_limit):
     training_set = json.load(open(training_set_path))["documents"]
@@ -27,24 +30,34 @@ def build_vocabulary(dataset, vocabulary_size):
         pairs of words that do not exist in the vocabulary.
     """
 
+    threshold = 0.0001
+
     #Regex to remove special characters, keeping '-' for phrases like 'skip-gram'
-    dataset = regex.sub(r"", dataset)
-    vocabulary_all = nltk.word_tokenize(regex.sub(r"", dataset))
+    vocabulary_all = nltk.word_tokenize(regex1.sub(r"", dataset))
     index = 0
 
     #Remove one letter tokens
-    vocab_without_minus = [x.lower() for x in vocabulary_all if len(x) > 1]
+    vocab_without_minus = [x.lower() for x in vocabulary_all if not regex2.match(x)]
+    total_voc_size = len(vocab_without_minus)
 
-    vocabulary_temp = [["UNK", 0]]
-    vocabulary_temp.extend(collections.Counter(vocab_without_minus).most_common(vocabulary_size-1))
+    vocabulary_frequencies = [["UNK", 0]]
+    vocabulary_frequencies.extend(collections.Counter(vocab_without_minus).most_common(vocabulary_size-1))
 
-    vocabulary_temp_words = [x for (x,y) in vocabulary_temp]
+    deleted_words = []
+
+    for i in range(1, vocabulary_size):
+        freq = vocabulary_frequencies[i][1] / total_voc_size
+        p =  ((freq - threshold) / freq) - math.sqrt(threshold/freq)
+        if p > 0 and random.random() <= p:
+            deleted_words.append(vocabulary_frequencies[i][0])
+
+    vocabulary_frequencies_words = [x for (x,y) in vocabulary_frequencies if x not in deleted_words]
 
     vocabulary = dict()
-    for word in vocabulary_temp_words:
+    for word in vocabulary_frequencies_words:
         vocabulary[word] = len(vocabulary)
 
-    return vocabulary, dict(zip(vocabulary.values(), vocabulary.keys()))
+    return vocabulary, dict(zip(vocabulary.values(), vocabulary.keys())), vocabulary_frequencies, total_voc_size
 
 def build_skip_gram_dataset(texts, vocabulary, window_size):
     """
@@ -81,8 +94,8 @@ def get_batch(inputs, labels, batch_size, index):
     """
         Returns batch no. index.
         I.E. for batch_size = 128:
-            for index = 1 returns pairs 0-127
-            for index = 2 returns pairs 128-255, and so on.
+            for index = 0 returns pairs 0-127
+            for index = 1 returns pairs 128-255, and so on.
         Last batch is trimmed if there are less than 'batch_size' pairs.
     """
 

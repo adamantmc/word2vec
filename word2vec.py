@@ -17,7 +17,7 @@ for doc in training_set:
 vocabulary_size = 100000
 
 tlog("Building vocabulary.")
-vocabulary, reverse_vocabulary = build_vocabulary(texts, vocabulary_size)
+vocabulary, reverse_vocabulary, _, _ = build_vocabulary(texts, vocabulary_size)
 tlog("Vocabulary built.")
 
 tlog("Bulding Skip-Gram pairs.")
@@ -26,8 +26,8 @@ input_size = len(inputs)
 tlog("Skip-Gram pairs built.")
 
 #Pairs as (input, label)
-train_inputs = tf.placeholder(tf.int32, shape=[batch_size])
-train_labels = tf.placeholder(tf.int32, shape=[batch_size, 1])
+train_inputs = tf.placeholder(tf.int32, shape=[None])
+train_labels = tf.placeholder(tf.int32, shape=[None, 1])
 
 #Random initialization of embedding matrix.
 embeddings = tf.Variable(
@@ -62,13 +62,18 @@ tf.global_variables_initializer().run()
 tlog("Total number of pairs: " + str(len(inputs)))
 tlog("Training:")
 
-#Number of batches to train on
-training_steps = 100000
-for i in range(training_steps):
-    t_inputs, t_labels = get_batch(inputs, labels, batch_size, i)
-    feed_dict = {train_inputs:t_inputs, train_labels:np.reshape(t_labels, [batch_size, 1])}
+i = 0 #Index of current batch
+training_steps = int(len(inputs) / batch_size) + 1 #Only used for printing progr-ess bar
+t_inputs, t_labels = get_batch(inputs, labels, batch_size, i) #Initializing inputs
+
+#get_batch returns None for both lists if there are no data left, so we loop till we reach that.
+while t_inputs != None and t_labels != None:
+    i += 1
+    feed_dict = {train_inputs:t_inputs, train_labels:np.reshape(t_labels, [len(t_labels), 1])}
     sess.run(optimizer, feed_dict = feed_dict)
-    printProgressBar(i+1, training_steps)
+    printProgressBar(i, training_steps)
+
+    t_inputs, t_labels = get_batch(inputs, labels, batch_size, i)
 
 tlog("Done.")
 
@@ -76,29 +81,29 @@ w = sess.run(embeddings)
 
 #Visualization of embeddings using TSNE
 def plot_with_labels(low_dim_embs, labels, filename='tsne.png'):
-  assert low_dim_embs.shape[0] >= len(labels), "More labels than embeddings"
-  plt.figure(figsize=(18, 18))  # in inches
-  for i, label in enumerate(labels):
-    x, y = low_dim_embs[i, :]
-    plt.scatter(x, y)
-    plt.annotate(label,
-                 xy=(x, y),
-                 xytext=(5, 2),
-                 textcoords='offset points',
-                 ha='right',
-                 va='bottom')
+    assert low_dim_embs.shape[0] >= len(labels), "More labels than embeddings"
+    plt.figure(figsize=(18, 18))  # in inches
+    for i, label in enumerate(labels):
+        x, y = low_dim_embs[i, :]
+        plt.scatter(x, y)
+        plt.annotate(label,
+                     xy=(x, y),
+                     xytext=(5, 2),
+                     textcoords='offset points',
+                     ha='right',
+                     va='bottom')
 
-  plt.savefig(filename)
+    plt.savefig(filename)
 
 try:
-  from sklearn.manifold import TSNE
-  import matplotlib.pyplot as plt
+    from sklearn.manifold import TSNE
+    import matplotlib.pyplot as plt
 
-  tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
-  plot_only = 500
-  low_dim_embs = tsne.fit_transform(w[:plot_only, :])
-  labels = [reverse_vocabulary[i] for i in range(plot_only)]
-  plot_with_labels(low_dim_embs, labels)
+    tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
+    plot_only = 500
+    low_dim_embs = tsne.fit_transform(w[:plot_only, :])
+    labels = [reverse_vocabulary[i] for i in range(plot_only)]
+    plot_with_labels(low_dim_embs, labels)
 
 except ImportError:
-  print("Please install sklearn, matplotlib, and scipy to visualize embeddings.")
+    print("Please install sklearn, matplotlib, and scipy to visualize embeddings.")
