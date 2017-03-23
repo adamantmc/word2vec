@@ -3,6 +3,7 @@ import tensorflow as tf
 import math
 from util import *
 from data_processing import *
+from queries import *
 
 embedding_size = 128
 batch_size = 128
@@ -75,10 +76,14 @@ while t_inputs != None and t_labels != None:
 
     t_inputs, t_labels = get_batch(inputs, labels, batch_size, i)
 
-tlog("Done.")
+tlog("Done training.")
 
 w = sess.run(embeddings)
 
+tlog("Making vectors.")
+exec_queries(w, training_set[0:5000], test_set[0:100], vocabulary, embedding_size)
+
+tlog("Visualizing embeddings.")
 #Visualization of embeddings using TSNE
 def plot_with_labels(low_dim_embs, labels, filename='tsne.png'):
     assert low_dim_embs.shape[0] >= len(labels), "More labels than embeddings"
