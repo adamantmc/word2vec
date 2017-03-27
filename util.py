@@ -1,5 +1,23 @@
 import sys
 import datetime
+import json
+
+def read_datasets(training_set_path, test_set_path, training_set_limit, test_set_limit):
+    if training_set_limit != -1:
+        training_set = json.load(open(training_set_path))["documents"][0:training_set_limit]
+    else:
+        training_set = json.load(open(training_set_path))["documents"]
+
+    tlog("Training set read.")
+
+    if test_set_limit !=-1:
+        test_set = json.load(open(test_set_path))["documents"][0:test_set_limit]
+    else:
+        test_set = json.load(open(test_set_path))["documents"]
+
+    tlog("Test set read.")
+
+    return training_set, test_set
 
 def printProgressBar(progress, total):
     prog_bar = ""

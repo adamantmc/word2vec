@@ -27,17 +27,6 @@ def make_vector(embeddings, document, vocabulary, vec_size):
 
     return (vector/vec_size)
 
-def query(training_set, query_doc, threshold):
-    scores = []
-    i = 0
-
-    for doc in training_set:
-        scores.append([i, cosine_similarity(query_doc, doc)])
-        i += 1
-
-    scores.sort(key = lambda tup: tup[1], reverse = True)
-    return scores
-
 def make_vector_lists(training_set, test_set, embeddings, vocabulary, vec_size):
     train_vectors = []
     test_vectors = []
@@ -50,7 +39,18 @@ def make_vector_lists(training_set, test_set, embeddings, vocabulary, vec_size):
 
     return train_vectors, test_vectors
 
-def exec_queries(embeddings, training_set, test_set, vocabulary, vec_size):
+def query(training_set, query_doc, threshold):
+    scores = []
+    i = 0
+
+    for doc in training_set:
+        scores.append([i, cosine_similarity(query_doc, doc)])
+        i += 1
+
+    scores.sort(key = lambda tup: tup[1], reverse = True)
+    return scores
+
+def queries(training_set, test_set, train_vectors, test_vectors, path):
     threshold_start = 10
     threshold_end = 200
     thresholds = []
@@ -60,10 +60,8 @@ def exec_queries(embeddings, training_set, test_set, vocabulary, vec_size):
         thresholds.append(i)
         metrics_obj_list.append(Metrics())
 
-    fw = FileWriter()
+    fw = FileWriter(path)
     eval = Evaluator(training_set)
-
-    train_vectors, test_vectors = make_vector_lists(training_set, test_set, embeddings, vocabulary, vec_size)
 
     for i in range(len(test_vectors)):
         scores = query(train_vectors, test_vectors[i], threshold_end)
@@ -82,3 +80,7 @@ def exec_queries(embeddings, training_set, test_set, vocabulary, vec_size):
         obj.calculate(len(test_set))
 
     fw.writeToFiles(metrics_obj_list, thresholds)
+
+def word2vec_queries(embeddings, training_set, test_set, vocabulary, vec_size, path):
+    train_vectors, test_vectors = make_vector_lists(training_set, test_set, embeddings, vocabulary, vec_size)
+    queries(training_set, test_set, train_vectors, test_vectors, path)

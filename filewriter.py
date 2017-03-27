@@ -1,20 +1,19 @@
-import os;
+import os
 
 class FileWriter:
-    def __init__(self):
-        self.filenames = ["results/ma_accuracy.txt",
-                          "results/ma_f1score.txt",
-                          "results/ma_precision.txt",
-                          "results/ma_recall.txt",
-                          "results/mi_accuracy.txt",
-                          "results/mi_f1score.txt",
-                          "results/mi_precision.txt",
-                          "results/mi_recall.txt"]
+    def __init__(self, dir = "results"):
+        self.dir = dir
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
-    if not os.path.exists("results"):
-        os.makedirs("results")
-    if not os.path.exists("results/queries"):
-        os.makedirs("results/queries")
+        self.filenames = [self.dir+"/ma_accuracy.txt",
+                          self.dir+"/ma_f1score.txt",
+                          self.dir+"/ma_precision.txt",
+                          self.dir+"/ma_recall.txt",
+                          self.dir+"/mi_accuracy.txt",
+                          self.dir+"/mi_f1score.txt",
+                          self.dir+"/mi_precision.txt",
+                          self.dir+"/mi_recall.txt"]
 
     def writeToFiles(self, metrics_obj_list, thresholds):
         files = []
@@ -35,7 +34,7 @@ class FileWriter:
             file.close()
 
     def writeQueryResults(self, results, query_id):
-        file = open("results/queries/"+str(query_id)+".txt", 'w')
+        file = open(self.dir+"/queries/"+str(query_id)+".txt", 'w')
         for result in results:
             file.write(result[1]["title"]+"\n")
         file.close()

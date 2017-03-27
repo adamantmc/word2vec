@@ -5,11 +5,11 @@ from util import *
 from data_processing import *
 from queries import *
 
-embedding_size = 128
+embedding_size = 256
 batch_size = 128
 num_sampled = 64
 
-training_set, test_set = read_datasets("trainingSet","testSet",-1)
+training_set, test_set = read_datasets("trainingSet","testSet",-1,-1)
 
 texts = ""
 for doc in training_set:
@@ -81,7 +81,7 @@ tlog("Done training.")
 w = sess.run(embeddings)
 
 tlog("Making vectors.")
-exec_queries(w, training_set[0:5000], test_set[0:100], vocabulary, embedding_size)
+word2vec_queries(w, training_set, test_set[0:10], vocabulary, embedding_size, "word2vec_tensorflow")
 
 tlog("Visualizing embeddings.")
 #Visualization of embeddings using TSNE

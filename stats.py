@@ -5,7 +5,7 @@ from util import *
 from data_processing import *
 from operator import itemgetter
 
-training_set, test_set = read_datasets("trainingSet","testSet",-1)
+training_set, test_set = read_datasets("trainingSet","testSet",-1,-1)
 
 texts = ""
 for doc in training_set:

@@ -1,4 +1,3 @@
-import json
 import collections
 import nltk
 import re
@@ -6,21 +5,8 @@ import math
 import random
 from util import *
 
-regex1 = re.compile(r"[^a-zA-Z-\s]")
-regex2 = re.compile(r"^[\W_]+$")
-
-def read_datasets(training_set_path, test_set_path, test_set_limit):
-    training_set = json.load(open(training_set_path))["documents"]
-    tlog("Training set read.")
-
-    if test_set_limit !=-1:
-        test_set = json.load(open(test_set_path))["documents"][0:test_set_limit]
-    else:
-        test_set = json.load(open(test_set_path))["documents"]
-
-    tlog("Test set read.")
-
-    return training_set, test_set
+nonword_regex = re.compile(r"\W") #Expression to match non-word characters (characters not in[a-zA-Z0-9_])
+num_regex = re.compile(r"^\d+$") #Expression to match start of string (^), numbers (\d+) and end of string ($). Removes number-only tokens.
 
 def build_vocabulary(dataset, vocabulary_size):
     """
@@ -32,16 +18,19 @@ def build_vocabulary(dataset, vocabulary_size):
 
     threshold = 0.0001
 
-    #Regex to remove special characters, keeping '-' for phrases like 'skip-gram'
-    vocabulary_all = nltk.word_tokenize(regex1.sub(r"", dataset))
+    vocabulary_all = nltk.word_tokenize(dataset)
     index = 0
 
-    #Remove one letter tokens
-    vocab_without_minus = [x.lower() for x in vocabulary_all if not regex2.match(x)]
-    total_voc_size = len(vocab_without_minus)
+    clean_vocab = []
+    for word in vocabulary_all:
+        word_clean = nonword_regex.sub(r"", word.lower())
+        if len(word_clean) > 1 and not num_regex.match(word_clean):
+            clean_vocab.append(word_clean)
+
+    total_voc_size = len(clean_vocab)
 
     vocabulary_frequencies = [["UNK", 0]]
-    vocabulary_frequencies.extend(collections.Counter(vocab_without_minus).most_common(vocabulary_size-1))
+    vocabulary_frequencies.extend(collections.Counter(clean_vocab).most_common(vocabulary_size-1))
 
     deleted_words = []
 
