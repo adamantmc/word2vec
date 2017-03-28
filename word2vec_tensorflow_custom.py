@@ -80,7 +80,6 @@ tlog("Done training.")
 
 w = sess.run(embeddings)
 
-tlog("Making vectors.")
 word2vec_queries(w, training_set, test_set[0:10], vocabulary, embedding_size, "word2vec_tensorflow")
 
 tlog("Visualizing embeddings.")

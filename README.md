@@ -9,5 +9,7 @@ metrics.py | Class that holds the metrics values for macro-averaging and micro-a
 queries.py | Functions to generate vectors from documents and calculate similarities for queries
 stats.py | Prints the 100 top frequent words
 util.py | Dataset reading, printing with time and progress bar
-word2vec-gensim.py | Gensim implementation
-word2vec.py | TensorFlow implementation
+word2vec_gensim.py | Gensim implementation
+word2vec_tensorflow_custom.py | Custom TensorFlow implementation
+word2vec_tensorflow_google.py | Google's TensorFlow implementation
+
