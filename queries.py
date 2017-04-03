@@ -6,7 +6,7 @@ import math
 from evaluator import Evaluator
 from metrics import Metrics
 from filewriter import FileWriter
-
+from util import *
 
 def dot_product(v1, v2):
     return sum(map(operator.mul, v1, v2))
@@ -82,5 +82,7 @@ def queries(training_set, test_set, train_vectors, test_vectors, path):
     fw.writeToFiles(metrics_obj_list, thresholds)
 
 def word2vec_queries(embeddings, training_set, test_set, vocabulary, vec_size, path):
+    tlog("Making document vectors.")
     train_vectors, test_vectors = make_vector_lists(training_set, test_set, embeddings, vocabulary, vec_size)
+    tlog("Executing queries.")
     queries(training_set, test_set, train_vectors, test_vectors, path)

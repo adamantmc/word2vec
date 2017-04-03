@@ -1,3 +1,4 @@
+
 # Copyright 2015 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,19 +24,23 @@ import math
 import os
 import random
 import zipfile
+import re
 
 import numpy as np
 from six.moves import urllib
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
-
 from util import *
 from queries import *
+from args import *
+
+
+args = getParser().parse_args()
 
 nonword_regex = re.compile(r"\W") #Expression to match non-word characters (characters not in[a-zA-Z0-9_])
 num_regex = re.compile(r"^\d+$") #Expression to match start of string (^), numbers (\d+) and end of string ($). Removes number-only tokens.
 
-vocabulary_size = 50000
+vocabulary_size = 100000
 
 training_set, test_set = read_datasets("trainingSet","testSet",-1,-1)
 
@@ -115,9 +120,9 @@ for i in range(8):
 # Step 4: Build and train a skip-gram model.
 
 batch_size = 128
-embedding_size = 128  # Dimension of the embedding vector.
-skip_window = 1       # How many words to consider left and right.
-num_skips = 2         # How many times to reuse an input to generate a label.
+embedding_size = int(args.embedding_size)    # Dimension of the embedding vector.
+skip_window = int(args.window_size)          # How many words to consider left and right.
+num_skips = 2                           # How many times to reuse an input to generate a label.
 
 # We pick a random validation set to sample nearest neighbors. Here we limit the
 # validation samples to the words that have a low numeric ID, which by
@@ -125,7 +130,7 @@ num_skips = 2         # How many times to reuse an input to generate a label.
 valid_size = 16     # Random set of words to evaluate similarity on.
 valid_window = 100  # Only pick dev samples in the head of the distribution.
 valid_examples = np.random.choice(valid_window, valid_size, replace=False)
-num_sampled = 64    # Number of negative examples to sample.
+num_sampled = int(args.num_samples)    # Number of negative examples to sample.
 
 graph = tf.Graph()
 
@@ -187,7 +192,7 @@ with tf.Session(graph=graph) as session:
 
   final_embeddings = embeddings.eval()
 
-word2vec_queries(final_embeddings, training_set, test_set[0:10], vocabulary, embedding_size, "word2vec_tensorflow_google")
+word2vec_queries(final_embeddings, training_set, test_set[0:10], dictionary, embedding_size, "word2vec_tensorflow_google_" + str(embedding_size) + "_" + str(skip_window) + "_" + str(num_sampled))
 
 # Step 6: Visualize the embeddings.
 def plot_with_labels(low_dim_embs, labels, filename='tsne.png'):

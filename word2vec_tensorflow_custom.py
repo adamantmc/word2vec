@@ -4,11 +4,14 @@ import math
 from util import *
 from data_processing import *
 from queries import *
+from args import *
 
-embedding_size = 256
+args = getParser().parse_args()
+
+embedding_size = int(args.embedding_size)
 batch_size = 128
-num_sampled = 64
-
+num_sampled = int(args.num_samples)
+skip_window = int(args.window_size)
 training_set, test_set = read_datasets("trainingSet","testSet",-1,-1)
 
 texts = ""
@@ -22,7 +25,7 @@ vocabulary, reverse_vocabulary, _, _ = build_vocabulary(texts, vocabulary_size)
 tlog("Vocabulary built.")
 
 tlog("Bulding Skip-Gram pairs.")
-inputs, labels = build_skip_gram_dataset(texts, vocabulary, 5)
+inputs, labels = build_skip_gram_dataset(texts, vocabulary, (skip_window*2)+1)
 input_size = len(inputs)
 tlog("Skip-Gram pairs built.")
 
@@ -80,7 +83,7 @@ tlog("Done training.")
 
 w = sess.run(embeddings)
 
-word2vec_queries(w, training_set, test_set[0:10], vocabulary, embedding_size, "word2vec_tensorflow")
+word2vec_queries(w, training_set, test_set[0:10], vocabulary, embedding_size, "word2vec_tensorflow_custom_" + str(embedding_size) + "_" + str(skip_window) + "_" + str(num_sampled))
 
 tlog("Visualizing embeddings.")
 #Visualization of embeddings using TSNE

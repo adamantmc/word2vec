@@ -5,12 +5,16 @@ from data_processing import *
 from queries import *
 from nltk import tokenize
 from gensim import models
+from args import *
+
+args = getParser().parse_args()
+
+embedding_size = int(args.embedding_size)
+window_size = int(args.window_size)
+num_samples = int(args.num_samples)
 
 model_filename = "./word2vec_model"
 
-embedding_size = 256
-batch_size = 128
-num_sampled = 64
 threshold = 0.0001
 
 nonword_regex = re.compile(r"\W") #Expression to match non-word characters (characters not in[a-zA-Z0-9_])
@@ -27,9 +31,9 @@ def clean_text(text):
 
     return clean_words
 
-def generateModel(sentences, size):
+def generateModel(sentences, embedding_size, num_samples, window_size):
     tlog("Generating Word2Vec model.")
-    model = models.Word2Vec(sentences, size=size, negative = num_sampled, sample = threshold)
+    model = models.Word2Vec(sentences, size=embedding_size, negative = num_samples, sample = threshold, window = window_size)
     tlog("Model generated.")
     return model
 
@@ -70,7 +74,7 @@ else:
         for sentence in temp:
             sentences.append(clean_text(sentence))
 
-    word2vec = generateModel(sentences, embedding_size)
+    word2vec = generateModel(sentences, embedding_size, num_samples, window_size)
     tlog("Saving model to disk.")
     word2vec.save(model_filename)
 
@@ -82,5 +86,5 @@ train_vectors = make_vectors(word_vectors, training_set, embedding_size)
 test_vectors = make_vectors(word_vectors, test_set, embedding_size)
 
 tlog("Making queries.")
-queries(training_set, test_set[0:10], train_vectors, test_vectors[0:10], "word2vec_gensim")
+queries(training_set, test_set[0:10], train_vectors, test_vectors[0:10], "word2vec_gensim_" + str(embedding_size) + "_" + str(window_size) + "_" + str(num_samples))
 tlog("Done.")
