@@ -2,6 +2,7 @@
 
 Filename | Contents
 ---------|---------
+args.py | Argument parser
 data_processing.py | Functions to build a dataset and divide it in batches for the TensorFlow implementation
 evaluator.py | Class that implements the evaluating system
 filewriter.py | Class that writes results to files
