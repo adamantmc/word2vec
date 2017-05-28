@@ -36,7 +36,6 @@ def printProgressBar(progress, total):
         print("\t["+prog_bar+padding+"] 100%")
         print()
 
-
 def getTime():
     return str(datetime.datetime.time(datetime.datetime.now()))
 

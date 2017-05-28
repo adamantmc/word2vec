@@ -51,8 +51,8 @@ def query(training_set, query_doc, threshold):
     return scores
 
 def queries(training_set, test_set, train_vectors, test_vectors, path):
-    threshold_start = 10
-    threshold_end = 200
+    threshold_start = 1
+    threshold_end = 10
     thresholds = []
     metrics_obj_list = []
 
@@ -73,8 +73,8 @@ def queries(training_set, test_set, train_vectors, test_vectors, path):
             eval.query([training_set[x] for (x,y) in scores[0:threshold]], query_doc)
             eval.calculate()
 
-            metrics_obj_list[j].updateConfusionMatrix(eval.getTp(), eval.getTn(), eval.getFp(), eval.getFn())
-            metrics_obj_list[j].updateMacroAverages(eval.getAccuracy(), eval.getF1Score(), eval.getPrecision(), eval.getRecall())
+            metrics_obj_list[j].updateConfusionMatrix(eval)
+            metrics_obj_list[j].updateMacroAverages(eval)
 
     for obj in metrics_obj_list:
         obj.calculate(len(test_set))

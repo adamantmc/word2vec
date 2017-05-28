@@ -83,7 +83,7 @@ tlog("Done training.")
 
 w = sess.run(embeddings)
 
-word2vec_queries(w, training_set, test_set[0:10], vocabulary, embedding_size, "word2vec_tensorflow_custom_" + str(embedding_size) + "_" + str(skip_window) + "_" + str(num_sampled))
+word2vec_queries(w, training_set, test_set[0:200], vocabulary, embedding_size, "word2vec_tensorflow_custom_" + str(embedding_size) + "_" + str(skip_window) + "_" + str(num_sampled))
 
 tlog("Visualizing embeddings.")
 #Visualization of embeddings using TSNE
